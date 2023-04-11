@@ -15,7 +15,7 @@ class IDError(Exception):
 
 
 @app.route('/find_list')
-def nums_prof():
+def find_listt():
     return jsonify(find_list(headers=headers))
     
 
