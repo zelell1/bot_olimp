@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from find_list import find_list
+from profiles_parser import profiles
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'abobus'
 app.config['JSON_AS_ASCII'] = False
@@ -17,6 +18,10 @@ class IDError(Exception):
 @app.route('/find_list')
 def find_listt():
     return jsonify(find_list(headers=headers))
+
+@app.route('/olimpix')
+def olimpix():
+    return jsonify(profiles())
     
 
 if __name__ == '__main__':

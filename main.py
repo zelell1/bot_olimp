@@ -6,7 +6,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 from Token import TOKEN
-from init_db import User
+from aiogram.types.web_app_info import WebAppInfo
+from init_db import User 
 import requests
 
 bot = Bot(token=TOKEN)
@@ -30,12 +31,9 @@ async def continu(call: types.CallbackQuery):
     await call.message.edit_reply_markup()
     await call.message.delete()
     usern = user.usernam()
-    response = requests.get("http://127.0.0.1:8000/num_profiles").json()
-    keyboard = ReplyKeyboardMarkup()
-    for key, val in response.items():
-        keyboard.add(KeyboardButton(text=f"""{key}""", callback_data=f"{val}"))
-    keyboard.add(KeyboardButton(text=f"""Я закончил""", callback_data=f"end"))
-    await call.message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите предметы, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
+    markup = ReplyKeyboardMarkup()
+    markup.add(KeyboardButton('Отркыть веб страницу', web_app=WebAppInfo(url='https://zelell1.github.io/')))
+    await call.message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите предметы, в которые вас интересуют""", parse_mode="HTML", reply_markup=markup)
     
 
 if __name__ == '__main__':
