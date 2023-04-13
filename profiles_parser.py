@@ -20,7 +20,6 @@ def profiles():
     result1 += ["Остальные"]
     result2 = soup.find_all('table', class_="note_table")
     del result2[0]
-    dates = {"янв": 1, "фев" : 2, "мар" : 3, "апр" : 4, "май": 5, 'июн': 6, 'июл': 7, "авг": 8, "сен": 9, "окт": 10, "ноя": 11, "дек": 12}
     lisst = []
     for i in range(len(result1)):
         soup2 = BeautifulSoup(str(result2[i]), 'lxml')
