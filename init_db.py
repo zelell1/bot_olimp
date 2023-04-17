@@ -14,6 +14,7 @@ class User:
         if self.id not in users_id:
             cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username))
             self.con.commit()
+            
 
     def usernam(self):
         cur = self.con.cursor()

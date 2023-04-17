@@ -48,14 +48,10 @@ def profiles():
             book[key].append(dictt)
         lisst.append(book)
     return lisst
-
-            
-        
         
 
 def main():
     profiles()
-
 
 
 if __name__ == "__main__":

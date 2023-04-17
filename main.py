@@ -12,29 +12,36 @@ import requests
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-a = []
+
+
 @dp.message_handler(commands=['start'])  # функция вызова сообщения с помощью
-async def helping(message: types.Message):
+async def starting(message: types.Message):
     global user
     inf_user = message.from_user
     user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'])
     user.add_user()
-    keyboard = InlineKeyboardMarkup(one_time_keyboard=True)
-    keyboard.add(InlineKeyboardButton(text=f"""Я хочу продолжить""", callback_data="continue"))
     await message.answer(f"""<strong>Это персональный-бот помощник.</strong> 
 Он будет помогать вам в отслеживании олимпиад.\t
-С ним больше не беспокойтесь, что пропустите олимпиаду.""", parse_mode="HTML", reply_markup=keyboard)
+С ним больше не беспокойтесь, что пропустите олимпиаду.""", parse_mode="HTML")
     
 
-@dp.callback_query_handler(text="continue")
-async def continu(call: types.CallbackQuery):
-    await call.message.edit_reply_markup()
-    await call.message.delete()
+@dp.message_handler(commands=['add'])
+async def olimpiads(message: types.Message):
     usern = user.usernam()
-    markup = ReplyKeyboardMarkup()
-    markup.add(KeyboardButton('Отркыть веб страницу', web_app=WebAppInfo(url='https://zelell1.github.io/')))
-    await call.message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите предметы, в которые вас интересуют""", parse_mode="HTML", reply_markup=markup)
-    
+    url = 'http://127.0.0.1:8000/list_olimpix'
+    response = requests.get(url=url).json()
+    keyboard = types.InlineKeyboardMarkup()
+    for elem in response:
+        keyboard.add(types.InlineKeyboardButton(text=elem, callback_data=f"prof:{elem}"))
+    await message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите профили предметов, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
+
+
+@dp.callback_query_handler(text_startswith="prof") 
+async def find_in_prof(query: CallbackQuery):
+    await query.answer()
+    await query.message.edit_reply_markup()
+    await query.message.answer(query.data.split(':'))
+
 
 if __name__ == '__main__':
     executor.start_polling(dp)
