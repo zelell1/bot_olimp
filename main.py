@@ -39,12 +39,26 @@ async def olimpiads(message: types.Message):
 @dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
     await query.answer()
+    await query.message.delete()
     data = query.data.split(':')
     prof = data[-2]
     ind = int(data[-1])
     url = 'http://127.0.0.1:8000/olimpix'
     response = requests.get(url=url).json()
-    await query.message.answer(response[ind][prof])
+    await query.message.answer("""Когда будете выбирать олимпиады пожалуйста вводите через запятую уникальный номер олимпиад/олимпиады""", parse_mode="HTML")
+    await query.message.answer("""Например 1,4,10,11 и т.д""", parse_mode="HTML")
+    for i in response[ind][prof]:
+        dataset = i["".join(list(i.keys()))]
+        num = dataset[0]
+        desc = dataset[1]
+        level = dataset[2]
+        uniq = dataset[-1].split('/')[-1]
+        await query.message.answer(f"""<strong>Наименование олимпиады</strong>: {"".join(list(i.keys()))}  
+<strong>№ в перечне</strong>:  {num}  
+<strong>Предмет</strong>: {desc}  
+<strong>Уровень</strong>: {level}
+<strong>Уникальный номер</strong>: {uniq} """, parse_mode="HTML")
+
 
 
 if __name__ == '__main__':
