@@ -32,15 +32,19 @@ async def olimpiads(message: types.Message):
     response = requests.get(url=url).json()
     keyboard = types.InlineKeyboardMarkup()
     for elem in response:
-        keyboard.add(types.InlineKeyboardButton(text=elem, callback_data=f"prof:{elem}"))
+        keyboard.add(types.InlineKeyboardButton(text=elem, callback_data=f"p:{elem}:{response.index(elem)}"))
     await message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите профили предметов, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
 
 
-@dp.callback_query_handler(text_startswith="prof") 
+@dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
     await query.answer()
-    await query.message.edit_reply_markup()
-    await query.message.answer(query.data.split(':'))
+    data = query.data.split(':')
+    prof = data[-2]
+    ind = int(data[-1])
+    url = 'http://127.0.0.1:8000/olimpix'
+    response = requests.get(url=url).json()
+    await query.message.answer(response[ind][prof])
 
 
 if __name__ == '__main__':
