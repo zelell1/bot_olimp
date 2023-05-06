@@ -12,8 +12,9 @@ class User:
         cur = self.con.cursor()
         users_id = list(map(lambda x: x[0], cur.execute(f"SELECT user_id from users").fetchall()))
         if self.id not in users_id:
-            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username))
+            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, ''))
             self.con.commit()
+            
             
 
     def usernam(self):

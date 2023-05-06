@@ -9,10 +9,14 @@ from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
 from init_db import User 
 import requests
+from news_parser import news
+import schedule
+import re
+
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-
+# schedule.every().hour.do(news)
 
 @dp.message_handler(commands=['start'])  # функция вызова сообщения с помощью
 async def starting(message: types.Message):
@@ -38,6 +42,7 @@ async def olimpiads(message: types.Message):
 
 @dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
+    global prof, ind
     await query.answer()
     await query.message.delete()
     data = query.data.split(':')
@@ -58,6 +63,27 @@ async def find_in_prof(query: CallbackQuery):
 <strong>Предмет</strong>: {desc}  
 <strong>Уровень</strong>: {level}
 <strong>Уникальный номер</strong>: {uniq} """, parse_mode="HTML")
+        
+
+@dp.message_handler(commands=['append'])  # функция вызова сообщения с помощью
+async def starting(message: types.Message):
+    com = "".join(message.get_full_command()[1])
+    lst = com.split(',').sort()
+    print(lst)
+    url = 'http://127.0.0.1:8000/olimpix'
+    response = requests.get(url=url).json()[ind][prof]
+    cnt = 0
+    for j in range(len(lst)):
+        i = response[j]
+        dataset = i["".join(list(i.keys()))]
+        num = dataset[0]
+        desc = dataset[1]
+        level = dataset[2]
+        uniq = dataset[-1].split('/')[-1]
+        if uniq == lst[cnt]:
+            cnt += 1
+            print("".join(list(i.keys())))
+    
 
 
 
