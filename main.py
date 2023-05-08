@@ -15,6 +15,7 @@ import sqlite3
 import re
 import json
 import emoji
+import datetime
 
 
 bot = Bot(token=TOKEN)
@@ -53,8 +54,8 @@ async def find_in_prof(query: CallbackQuery):
     ind = int(data[-1])
     url = 'http://127.0.0.1:8000/olimpix'
     response = requests.get(url=url).json()
-    await query.message.answer("""Когда будете выбирать олимпиады пожалуйста вводите через запятую уникальный номер олимпиад/олимпиады""", parse_mode="HTML")
-    await query.message.answer("""Например 1,4,10,11 и т.д""", parse_mode="HTML")
+    await query.message.answer("""Когда будете выбирать олимпиады пожалуйста введите команду /append и введите цифры уникального кода олимпиады""", parse_mode="HTML")
+    await query.message.answer("""Например /append 5251 1324 4314 и т.д""", parse_mode="HTML")
     for i in response[ind][prof]:
         dataset = i["".join(list(i.keys()))]
         num = dataset[0]
@@ -82,7 +83,7 @@ async def appending(message: types.Message):
             if str(uniq) in com:
                 data.append(uniq)
         user.update_info_user(data)
-        await message.answer(f"""<strong>Вы успешно добавили олимпиады</strong>""", parse_mode="HTML")
+        await message.answer(f"""<strong>Вы успешно добавили олимпиады/олимпиаду</strong>""", parse_mode="HTML")
     except Exception as e:
         await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
 
@@ -101,6 +102,13 @@ async def list_olimpiads(message: types.Message):
         await message.answer('\n'.join(list(map(lambda x: emoji.emojize(':large_orange_diamond:') + x, names))))
     except Exception:
         await message.answer(f"""<strong>Пока что вы не добавили ни одной</strong>""", parse_mode="HTML")
+
+
+
+# def check_news():
+#     with open('news.json', encoding='utf-8') as f:
+#             templates = json.load(f)
+#     for key, val in templates.items():
 
 
     
