@@ -82,7 +82,7 @@ async def appending(message: types.Message):
             if str(uniq) in com:
                 data.append(uniq)
         user.update_info_user(data)
-        await message.answer(f"""<strong>Вы успешно добавили следующие олимпиады</strong>""", parse_mode="HTML")
+        await message.answer(f"""<strong>Вы успешно добавили олимпиады</strong>""", parse_mode="HTML")
     except Exception as e:
         await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
 
