@@ -25,7 +25,12 @@ class User:
         cur = self.con.cursor()
         cur.execute(f"""UPDATE users SET olimpiads = (?) WHERE user_id = (?)""", (st, self.id))
         self.con.commit()
-            
+    
+
+    def get_list(self):
+        cur = self.con.cursor()
+        return list(set("".join(map(lambda x: x[0], cur.execute("SELECT olimpiads from users WHERE user_id = (?)", (str(self.id), )).fetchall())).split(';')))
+
 
     def usernam(self):
         cur = self.con.cursor()

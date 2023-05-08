@@ -13,6 +13,8 @@ from news_parser import news
 import schedule
 import sqlite3
 import re
+import json
+import emoji
 
 
 bot = Bot(token=TOKEN)
@@ -39,14 +41,7 @@ async def olimpiads(message: types.Message):
     for elem in response:
         keyboard.add(types.InlineKeyboardButton(text=elem, callback_data=f"p:{elem}:{response.index(elem)}"))
     await message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите профили предметов, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
-
-
-
-# @dp.message_handler(commands=['list'])
-# async def list_olimpiads(message: types.Message):
-
     
-
 
 @dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
@@ -90,11 +85,24 @@ async def appending(message: types.Message):
         await message.answer(f"""<strong>Вы успешно добавили следующие олимпиады</strong>""", parse_mode="HTML")
     except Exception as e:
         await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
-        
+
+
+@dp.message_handler(commands=['list'])
+async def list_olimpiads(message: types.Message):
+    lst = user.get_list()
+    try:
+        with open('news.json', encoding='utf-8') as f:
+            templates = json.load(f)
+        names = []
+        for key, val in templates.items():
+            uniq = key.split('/')[-1]
+            if uniq in lst:
+                names.append(val[0])
+        await message.answer('\n'.join(list(map(lambda x: emoji.emojize(':large_orange_diamond:') + x, names))))
+    except Exception:
+        await message.answer(f"""<strong>Пока что вы не добавили ни одной</strong>""", parse_mode="HTML")
+
 
     
-
-
-
 if __name__ == '__main__':
     executor.start_polling(dp)
