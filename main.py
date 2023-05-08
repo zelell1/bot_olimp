@@ -11,6 +11,7 @@ from init_db import User
 import requests
 from news_parser import news
 import schedule
+import sqlite3
 import re
 
 
@@ -22,7 +23,7 @@ dp = Dispatcher(bot)
 async def starting(message: types.Message):
     global user
     inf_user = message.from_user
-    user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'])
+    user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'], '')
     user.add_user()
     await message.answer(f"""<strong>Это персональный-бот помощник.</strong> 
 Он будет помогать вам в отслеживании олимпиад.\t
@@ -38,6 +39,13 @@ async def olimpiads(message: types.Message):
     for elem in response:
         keyboard.add(types.InlineKeyboardButton(text=elem, callback_data=f"p:{elem}:{response.index(elem)}"))
     await message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите профили предметов, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
+
+
+
+# @dp.message_handler(commands=['list'])
+# async def list_olimpiads(message: types.Message):
+
+    
 
 
 @dp.callback_query_handler(text_startswith="p") 
@@ -65,24 +73,25 @@ async def find_in_prof(query: CallbackQuery):
 <strong>Уникальный номер</strong>: {uniq} """, parse_mode="HTML")
         
 
-@dp.message_handler(commands=['append'])  # функция вызова сообщения с помощью
-async def starting(message: types.Message):
-    com = "".join(message.get_full_command()[1])
-    lst = com.split(',').sort()
-    print(lst)
-    url = 'http://127.0.0.1:8000/olimpix'
-    response = requests.get(url=url).json()[ind][prof]
-    cnt = 0
-    for j in range(len(lst)):
-        i = response[j]
-        dataset = i["".join(list(i.keys()))]
-        num = dataset[0]
-        desc = dataset[1]
-        level = dataset[2]
-        uniq = dataset[-1].split('/')[-1]
-        if uniq == lst[cnt]:
-            cnt += 1
-            print("".join(list(i.keys())))
+@dp.message_handler(commands=['append'])  
+async def appending(message: types.Message):
+    try:
+        com = "".join(message.get_full_command()[1])
+        com = re.findall(r'(?i)([0-9]+)', com)
+        url = 'http://127.0.0.1:8000/olimpix'
+        data = []
+        response = requests.get(url=url).json()[ind][prof]
+        for i in response:
+            dataset = i["".join(list(i.keys()))]
+            uniq = dataset[-1].split('/')[-1]
+            if str(uniq) in com:
+                data.append(uniq)
+        user.update_info_user(data)
+        await message.answer(f"""<strong>Вы успешно добавили следующие олимпиады</strong>""", parse_mode="HTML")
+    except Exception as e:
+        await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
+        
+
     
 
 

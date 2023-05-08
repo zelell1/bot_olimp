@@ -1,20 +1,30 @@
 import sqlite3
 
 class User:
-    def __init__(self, id, first_name, last_name, username):       
+    def __init__(self, id, first_name, last_name, username, olimpiads):       
         self.con = sqlite3.connect("Bot_users.db")
         self.id = id
         self.fr = first_name
         self.lr = last_name
         self.username = username
+        self.olimps = olimpiads
             
     def add_user(self):
         cur = self.con.cursor()
         users_id = list(map(lambda x: x[0], cur.execute(f"SELECT user_id from users").fetchall()))
         if self.id not in users_id:
-            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, ''))
+            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, self.olimps))
+            self.olimps = []
             self.con.commit()
-            
+        else:
+            self.olimps = list(set("".join(map(lambda x: x[0], cur.execute("SELECT olimpiads from users WHERE user_id = (?)", (str(self.id), )).fetchall())).split(';')))
+
+    def update_info_user(self, olimps):
+        self.olimps += list(set(olimps))
+        st = ";".join(set(self.olimps))
+        cur = self.con.cursor()
+        cur.execute(f"""UPDATE users SET olimpiads = (?) WHERE user_id = (?)""", (st, self.id))
+        self.con.commit()
             
 
     def usernam(self):
