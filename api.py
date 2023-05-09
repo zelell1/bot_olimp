@@ -2,6 +2,8 @@ from flask import Flask, jsonify
 from find_list import find_list
 from profiles_parser import profiles
 from list_profiles import list_profiles
+from news_parser_olimp import newss
+from news_parser import lsst
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'abobus'
 app.config['JSON_AS_ASCII'] = False
@@ -29,6 +31,15 @@ def olimpix():
 @app.route('/list_olimpix')
 def list_olimpix():
     return jsonify(list_profiles())
+
+
+@app.route('/news/<int:num>')
+def news(num):
+    return jsonify(newss(str(num)))
+
+@app.route('/list')
+def listt():
+    return jsonify(lsst())
 
 if __name__ == '__main__':
     app.run(port=8000, host="127.0.0.1", debug=True)

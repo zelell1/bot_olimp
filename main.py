@@ -9,7 +9,6 @@ from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
 from init_db import User 
 import requests
-from news_parser import news
 import schedule
 import sqlite3
 import re
@@ -84,7 +83,7 @@ async def appending(message: types.Message):
                 data.append(uniq)
         user.update_info_user(data)
         await message.answer(f"""<strong>Вы успешно добавили олимпиады/олимпиаду</strong>""", parse_mode="HTML")
-    except Exception as e:
+    except Exception:
         await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
 
 
@@ -92,16 +91,30 @@ async def appending(message: types.Message):
 async def list_olimpiads(message: types.Message):
     lst = user.get_list()
     try:
-        with open('news.json', encoding='utf-8') as f:
-            templates = json.load(f)
-        names = []
-        for key, val in templates.items():
-            uniq = key.split('/')[-1]
-            if uniq in lst:
-                names.append(val[0])
-        await message.answer('\n'.join(list(map(lambda x: emoji.emojize(':large_orange_diamond:') + x, names))))
+        print(lst)
+        if lst == [] or lst == ['']:
+            raise Exception
+        url = 'http://127.0.0.1:8000/list'
+        response = requests.get(url=url).json()
+        a = []
+        for i in response:
+            dictt = {}
+            for key, val in i.items():
+                names = []
+                for j in val:
+                    if j[0] in lst:
+                        names.append(j[1])
+                        del lst[lst.index(j[0])]
+                if names != []:
+                    dictt[key] = names
+            if dictt != {}:
+                a.append(dictt)
+        for i in a:
+            for key, val in i.items():
+                await message.answer(f"""<strong>{key}</strong>""", parse_mode="HTML")
+                await message.answer('\n'.join(list(map(lambda x: emoji.emojize(':large_orange_diamond:') + x, val))))
     except Exception:
-        await message.answer(f"""<strong>Пока что вы не добавили ни одной</strong>""", parse_mode="HTML")
+        await message.answer(f"""<strong>Пока что вы не добавили ни одной олимпиады</strong>""", parse_mode="HTML")
 
 
 
