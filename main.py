@@ -9,12 +9,12 @@ from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
 from init_db import User 
 import requests
-import schedule
-import sqlite3
 import re
-import json
 import emoji
+import asyncio
 import datetime
+import aioschedule
+import requests
 
 
 bot = Bot(token=TOKEN)
@@ -24,6 +24,7 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=['start'])  # функция вызова сообщения с помощью
 async def starting(message: types.Message):
     global user
+    global inf_user
     inf_user = message.from_user
     user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'], '')
     user.add_user()
@@ -91,9 +92,10 @@ async def appending(message: types.Message):
 async def list_olimpiads(message: types.Message):
     lst = user.get_list()
     try:
-        print(lst)
         if lst == [] or lst == ['']:
             raise Exception
+        if lst[0] == '':
+            del lst[0]
         url = 'http://127.0.0.1:8000/list'
         response = requests.get(url=url).json()
         a = []
@@ -117,13 +119,48 @@ async def list_olimpiads(message: types.Message):
         await message.answer(f"""<strong>Пока что вы не добавили ни одной олимпиады</strong>""", parse_mode="HTML")
 
 
+@dp.message_handler()
+async def choose_your_dinner():
+    lst = user.get_list()
+    try:
+        if lst == [] or lst == ['']:
+            raise Exception
+        if lst[0] == '':
+            del lst[0]
+        time = datetime.datetime.now()
+        # для демонтстрации
+        # time = datetime.datetime(2023, 4, 27) 
+        # 397
+        print(lst)
+        for i in lst:
+            print(i)
+            url = f'http://127.0.0.1:8000/news/{i}'
+            response = requests.get(url=url).json()
+            print(response)
+            tm = response[0]
+            date = int(tm[0])
+            month = int(tm[1])
+            year = int(tm[2])
+            print(time.year, time.day, time.month)
+            if int(time.year) == year and int(time.day) == date and int(time.month) == month:
+                print(1)
+                print(response)
+                await bot.send_message(chat_id=inf_user['id'], text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
+                await bot.send_message(chat_id=inf_user['id'], text=f"""{response[1]}""", parse_mode="HTML")
+    except Exception:
+        pass
 
-# def check_news():
-#     with open('news.json', encoding='utf-8') as f:
-#             templates = json.load(f)
-#     for key, val in templates.items():
 
+async def scheduler():
+    aioschedule.every().day.at("18:32").do(choose_your_dinner)
+    while True:
+        await aioschedule.run_pending()
+        await asyncio.sleep(1)
+        
+async def on_startup(dp): 
+    asyncio.create_task(scheduler())
 
     
 if __name__ == '__main__':
-    executor.start_polling(dp)
+    executor.start_polling(dp, on_startup=on_startup)
+    
