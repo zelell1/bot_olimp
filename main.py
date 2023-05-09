@@ -7,7 +7,8 @@ ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
-from init_db import User 
+from init_db import User
+from init_db import fl 
 import requests
 import re
 import emoji
@@ -29,10 +30,14 @@ async def starting(message: types.Message):
     global inf_user
     inf_user = message.from_user
     user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'], '')
-    user.add_user()
-    await message.answer(f"""<strong>Это персональный-бот помощник.</strong> 
+    if user.add_user():
+        user.add_user()
+        await message.answer(f"""<strong>Это персональный-бот помощник.</strong> 
 Он будет помогать вам в отслеживании олимпиад.\t
 С ним больше не беспокойтесь, что пропустите олимпиаду.""", parse_mode="HTML")
+        await message.answer(f"""Спасибо за регистрацию.""", parse_mode="HTML")
+    else:
+        await message.answer(f"""Вы уже зарегистрированы.""", parse_mode="HTML")
     
 
 #функция выводит профили олимпиад

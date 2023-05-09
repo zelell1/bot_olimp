@@ -1,6 +1,6 @@
 import sqlite3
 
-
+fl = False
 # создаем класс пользователя
 class User:
     def __init__(self, id, first_name, last_name, username, olimpiads):       
@@ -19,8 +19,11 @@ class User:
             cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, self.olimps))
             self.olimps = []
             self.con.commit()
+            return True
+            
         else:
             self.olimps = list(set("".join(map(lambda x: x[0], cur.execute("SELECT olimpiads from users WHERE user_id = (?)", (str(self.id), )).fetchall())).split(';')))
+            return False
 
 
     # обновляем информацию об олимпиадах пользователя
