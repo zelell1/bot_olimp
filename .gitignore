@@ -1,2 +1,7 @@
 Bot_users.db
 Token.py
+__pycache__/find_list.cpython-310.pyc
+__pycache__/news_parser_olimp.cpython-310.pyc
+__pycache__/news_parser.cpython-310.pyc
+__pycache__/list_profiles.cpython-310.pyc
+__pycache__/profiles_parser.cpython-310.pyc
