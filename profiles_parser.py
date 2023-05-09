@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
+# функция пробегает по сайту и берет перечневые олимпиады
 def profiles():
     url = f'http://127.0.0.1:8000/find_list'
     url = requests.get(url=url).json()['res']

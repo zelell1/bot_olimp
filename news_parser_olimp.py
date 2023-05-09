@@ -1,9 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-import datetime
-import json 
-import time 
 
+
+# функция пробегает по сайту и берет полседенюю новость по передаваемой олимпиаде
 def newss(ssilka):
     dates = {"января": 1, "февраля" : 2, "марта" : 3, "апреля" : 4, "мая": 5, 'июня': 6, 'июля': 7, "августа": 8, "сентября": 9, "октября": 10, "ноября": 11, "декабря": 12}
     url = "https://olimpiada.ru/activity/" + str(ssilka) + "/news"

@@ -1,5 +1,7 @@
 import sqlite3
 
+
+# создаем класс пользователя
 class User:
     def __init__(self, id, first_name, last_name, username, olimpiads):       
         self.con = sqlite3.connect("Bot_users.db")
@@ -8,7 +10,8 @@ class User:
         self.lr = last_name
         self.username = username
         self.olimps = olimpiads
-            
+
+    # добавляем нового пользователя
     def add_user(self):
         cur = self.con.cursor()
         users_id = list(map(lambda x: x[0], cur.execute(f"SELECT user_id from users").fetchall()))
@@ -19,6 +22,8 @@ class User:
         else:
             self.olimps = list(set("".join(map(lambda x: x[0], cur.execute("SELECT olimpiads from users WHERE user_id = (?)", (str(self.id), )).fetchall())).split(';')))
 
+
+    # обновляем информацию об олимпиадах пользователя
     def update_info_user(self, olimps):
         self.olimps += list(set(olimps))
         st = ";".join(set(self.olimps))
@@ -27,11 +32,13 @@ class User:
         self.con.commit()
     
 
+    # берем список из олимпиад пользователя
     def get_list(self):
         cur = self.con.cursor()
         return list(set("".join(map(lambda x: x[0], cur.execute("SELECT olimpiads from users WHERE user_id = (?)", (str(self.id), )).fetchall())).split(';')))
 
 
+    # получаем ник пользователя
     def usernam(self):
         cur = self.con.cursor()
         usersn = list(map(lambda x: x[0], cur.execute(f"""SELECT username from users WHERE user_id = '{self.id}'""").fetchall()))

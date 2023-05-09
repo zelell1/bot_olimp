@@ -17,11 +17,13 @@ import aioschedule
 import requests
 
 
+# Создаем бота
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-# schedule.every().hour.do(news)
 
-@dp.message_handler(commands=['start'])  # функция вызова сообщения с помощью
+
+# функция начинает работу бота
+@dp.message_handler(commands=['start'])  
 async def starting(message: types.Message):
     global user
     global inf_user
@@ -33,6 +35,7 @@ async def starting(message: types.Message):
 С ним больше не беспокойтесь, что пропустите олимпиаду.""", parse_mode="HTML")
     
 
+#функция выводит профили олимпиад
 @dp.message_handler(commands=['add'])
 async def olimpiads(message: types.Message):
     usern = user.usernam()
@@ -44,6 +47,7 @@ async def olimpiads(message: types.Message):
     await message.answer(f"""Приветствую {usern}, теперь пожалуйста выберите профили предметов, в которые вас интересуют""", parse_mode="HTML", reply_markup=keyboard)
     
 
+# когда пользователь выбрал профиль олимпиады, бот начинает выводить перечневые олимпиады по выбранному профилю
 @dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
     global prof, ind
@@ -69,6 +73,7 @@ async def find_in_prof(query: CallbackQuery):
 <strong>Уникальный номер</strong>: {uniq} """, parse_mode="HTML")
         
 
+# функция добавляет олимпиады к пользователю
 @dp.message_handler(commands=['append'])  
 async def appending(message: types.Message):
     try:
@@ -88,6 +93,7 @@ async def appending(message: types.Message):
         await message.answer(f"""<strong>Введен некорректный запрос</strong>""", parse_mode="HTML")
 
 
+# функция выводит список олимпиад пользователю
 @dp.message_handler(commands=['list'])
 async def list_olimpiads(message: types.Message):
     lst = user.get_list()
@@ -119,6 +125,7 @@ async def list_olimpiads(message: types.Message):
         await message.answer(f"""<strong>Пока что вы не добавили ни одной олимпиады</strong>""", parse_mode="HTML")
 
 
+#функция анализирует новости по времени
 @dp.message_handler()
 async def choose_your_dinner():
     lst = user.get_list()
@@ -143,16 +150,15 @@ async def choose_your_dinner():
             year = int(tm[2])
             print(time.year, time.day, time.month)
             if int(time.year) == year and int(time.day) == date and int(time.month) == month:
-                print(1)
-                print(response)
                 await bot.send_message(chat_id=inf_user['id'], text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
                 await bot.send_message(chat_id=inf_user['id'], text=f"""{response[1]}""", parse_mode="HTML")
     except Exception:
         pass
 
 
+# функция которая в определенное время выводит новости пользователю
 async def scheduler():
-    aioschedule.every().day.at("18:32").do(choose_your_dinner)
+    aioschedule.every().day.at("18:00").do(choose_your_dinner)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
