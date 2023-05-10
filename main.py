@@ -140,19 +140,17 @@ async def choose_your_dinner():
         if lst[0] == '':
             del lst[0]
         time = datetime.datetime.now()
-        # для демонтстрации
-        # time = datetime.datetime(2023, 4, 27) 
-        # 397
-        print(lst)
         for i in lst:
-            print(i)
             url = f'http://127.0.0.1:8000/news/{i}'
             response = requests.get(url=url).json()
-            print(response)
             tm = response[0]
             date = int(tm[0])
             month = int(tm[1])
             year = int(tm[2])
+            # для демонтстрации
+            # date = time.day
+            # month = time.month
+            # year = time.year
             print(time.year, time.day, time.month)
             if int(time.year) == year and int(time.day) == date and int(time.month) == month:
                 await bot.send_message(chat_id=inf_user['id'], text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
@@ -163,10 +161,11 @@ async def choose_your_dinner():
 
 # функция которая в определенное время выводит новости пользователю
 async def scheduler():
-    aioschedule.every().day.at("18:00").do(choose_your_dinner)
+    aioschedule.every().day.at("17:30").do(choose_your_dinner)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
+        
         
 async def on_startup(dp): 
     asyncio.create_task(scheduler())
