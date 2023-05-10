@@ -1,6 +1,6 @@
 import sqlite3
 
-fl = False
+
 # создаем класс пользователя
 class User:
     def __init__(self, id, first_name, last_name, username, olimpiads):       

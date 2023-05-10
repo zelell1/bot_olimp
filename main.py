@@ -8,7 +8,6 @@ from aiogram.utils.callback_data import CallbackData
 from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
 from init_db import User
-from init_db import fl 
 import requests
 import re
 import emoji
