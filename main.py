@@ -160,7 +160,7 @@ async def choose_your_dinner():
 
 # функция которая в определенное время выводит новости пользователю
 async def scheduler():
-    aioschedule.every().day.at("17:30").do(choose_your_dinner)
+    aioschedule.every().day.at("22:45").do(choose_your_dinner)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)

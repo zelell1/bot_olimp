@@ -24,7 +24,7 @@ def newss(ssilka):
         name1 = str(soup6.find("h1", class_='headline'))
         name1 = name1[name1.find('<h1 class="headline"') + len('<h1 class="headline"') + 1: name1.find('</h1>')]
         news = str(soup6.find("div", class_='full_text').find('p'))
-        news = news[news.find('>') + 1: news.find('</p>') - len('p>')]
+        news = news[news.find('>') + 1: news.find('</p>') - len('p>') + 2]
         if 'Утвержден Перечень олимпиад школьников и их уровней' not in name1:
             ls.append(date)
             ls.append(news)
