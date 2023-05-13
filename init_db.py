@@ -9,14 +9,14 @@ class User:
         self.fr = first_name
         self.lr = last_name
         self.username = username
-        self.olimps = olimpiads
+        self.olimps = []
 
     # добавляем нового пользователя
     def add_user(self):
         cur = self.con.cursor()
         users_id = list(map(lambda x: x[0], cur.execute(f"SELECT user_id from users").fetchall()))
         if self.id not in users_id:
-            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, self.olimps))
+            cur.execute(f"INSERT INTO users VALUES(?, ?, ?, ?, ?)", (self.id, self.fr, self.lr , self.username, ''))
             self.olimps = []
             self.con.commit()
             return True
@@ -46,3 +46,11 @@ class User:
         cur = self.con.cursor()
         usersn = list(map(lambda x: x[0], cur.execute(f"""SELECT username from users WHERE user_id = '{self.id}'""").fetchall()))
         return usersn[0]
+    
+
+def get_users():
+    con = sqlite3.connect("Bot_users.db")
+    cur = con.cursor()
+    users = list(cur.execute(f"""SELECT user_id, first_name, last_name, username from users""").fetchall())
+    return users
+

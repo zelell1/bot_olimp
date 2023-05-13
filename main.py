@@ -7,7 +7,7 @@ ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 from Token import TOKEN
 from aiogram.types.web_app_info import WebAppInfo
-from init_db import User
+from init_db import User, get_users
 import requests
 import re
 import emoji
@@ -15,20 +15,25 @@ import asyncio
 import datetime
 import aioschedule
 import requests
+import sqlite3
 
 
 # Создаем бота
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-
+Users = dict()
+usr = get_users()
+for i in usr:
+    Users[str(i[0])] = User(i[0], i[1], i[2], i[3], '')
+    
 
 # функция начинает работу бота
 @dp.message_handler(commands=['start'])  
 async def starting(message: types.Message):
-    global user
-    global inf_user
     inf_user = message.from_user
     user = User(inf_user['id'], inf_user['first_name'], inf_user['last_name'], inf_user['username'], '')
+    if str(inf_user['id']) not in Users.keys():
+        Users[str(inf_user['id'])] = user
     if user.add_user():
         user.add_user()
         await message.answer(f"""<strong>Это персональный-бот помощник.</strong> 
@@ -42,6 +47,8 @@ async def starting(message: types.Message):
 #функция выводит профили олимпиад
 @dp.message_handler(commands=['add'])
 async def olimpiads(message: types.Message):
+    inf_user = message.from_user
+    user = Users[str(inf_user['id'])]
     usern = user.usernam()
     url = 'http://127.0.0.1:8000/list_olimpix'
     response = requests.get(url=url).json()
@@ -54,7 +61,6 @@ async def olimpiads(message: types.Message):
 # когда пользователь выбрал профиль олимпиады, бот начинает выводить перечневые олимпиады по выбранному профилю
 @dp.callback_query_handler(text_startswith="p") 
 async def find_in_prof(query: CallbackQuery):
-    global prof, ind
     await query.answer()
     await query.message.delete()
     data = query.data.split(':')
@@ -85,12 +91,17 @@ async def appending(message: types.Message):
         com = re.findall(r'(?i)([0-9]+)', com)
         url = 'http://127.0.0.1:8000/olimpix'
         data = []
-        response = requests.get(url=url).json()[ind][prof]
+        response = requests.get(url=url).json()
         for i in response:
-            dataset = i["".join(list(i.keys()))]
-            uniq = dataset[-1].split('/')[-1]
-            if str(uniq) in com:
-                data.append(uniq)
+            for j in i.values():
+                for k in j:
+                    dataset = k["".join(list(k.keys()))]
+                    uniq = dataset[-1].split('/')[-1]
+                    if str(uniq) in com:
+                        data.append(uniq)
+                        del com[com.index(str(uniq))]
+        inf_user = message.from_user
+        user = Users[str(inf_user['id'])]
         user.update_info_user(data)
         await message.answer(f"""<strong>Вы успешно добавили олимпиады/олимпиаду</strong>""", parse_mode="HTML")
     except Exception:
@@ -100,6 +111,8 @@ async def appending(message: types.Message):
 # функция выводит список олимпиад пользователю
 @dp.message_handler(commands=['list'])
 async def list_olimpiads(message: types.Message):
+    inf_user = message.from_user
+    user = Users[str(inf_user['id'])]
     lst = user.get_list()
     try:
         if lst == [] or lst == ['']:
@@ -132,35 +145,38 @@ async def list_olimpiads(message: types.Message):
 #функция анализирует новости по времени
 @dp.message_handler()
 async def choose_your_dinner():
-    lst = user.get_list()
-    try:
-        if lst == [] or lst == ['']:
-            raise Exception
-        if lst[0] == '':
-            del lst[0]
-        time = datetime.datetime.now()
-        for i in lst:
-            url = f'http://127.0.0.1:8000/news/{i}'
-            response = requests.get(url=url).json()
-            tm = response[0]
-            date = int(tm[0])
-            month = int(tm[1])
-            year = int(tm[2])
-            # для демонтстрации
-            # date = time.day
-            # month = time.month
-            # year = time.year
-            print(time.year, time.day, time.month)
-            if int(time.year) == year and int(time.day) == date and int(time.month) == month:
-                await bot.send_message(chat_id=inf_user['id'], text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
-                await bot.send_message(chat_id=inf_user['id'], text=f"""{response[1]}""", parse_mode="HTML")
-    except Exception:
-        pass
+    # inf_user = message.from_user
+    # user = Users[str(inf_user['id'])]
+    for key, val in Users.items():
+        lst = val.get_list()
+        try:
+            if lst == [] or lst == ['']:
+                raise Exception
+            if lst[0] == '':
+                del lst[0]
+            time = datetime.datetime.now()
+            for i in lst:
+                url = f'http://127.0.0.1:8000/news/{i}'
+                response = requests.get(url=url).json()
+                tm = response[0]
+                date = int(tm[0])
+                month = int(tm[1])
+                year = int(tm[2])
+                # для демонтстрации
+                # date = time.day
+                # month = time.month
+                # year = time.year
+                print(time.year, time.day, time.month)
+                if int(time.year) == year and int(time.day) == date and int(time.month) == month:
+                    await bot.send_message(chat_id=int(key), text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
+                    await bot.send_message(chat_id=int(key), text=f"""{response[1]}""", parse_mode="HTML")
+        except Exception:
+            pass
 
 
 # функция которая в определенное время выводит новости пользователю
 async def scheduler():
-    aioschedule.every().day.at("22:45").do(choose_your_dinner)
+    aioschedule.every().day.at("17:00").do(choose_your_dinner)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
