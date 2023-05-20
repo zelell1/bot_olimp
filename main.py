@@ -158,14 +158,14 @@ async def choose_your_dinner():
             for i in lst:
                 url = f'http://127.0.0.1:8000/news/{i}'
                 response = requests.get(url=url).json()
-                tm = response[0]
-                date = int(tm[0])
-                month = int(tm[1])
-                year = int(tm[2])
+                # tm = response[0]
+                # date = int(tm[0])
+                # month = int(tm[1])
+                # year = int(tm[2])
                 # для демонтстрации
-                # date = time.day
-                # month = time.month
-                # year = time.year
+                date = time.day
+                month = time.month
+                year = time.year
                 print(time.year, time.day, time.month)
                 if int(time.year) == year and int(time.day) == date and int(time.month) == month:
                     await bot.send_message(chat_id=int(key), text=f"""<strong>Новость по олимпиаде {response[-1]}</strong>""", parse_mode="HTML")
